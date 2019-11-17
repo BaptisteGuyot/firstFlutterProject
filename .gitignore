@@ -1,3 +1,12 @@
+# CLIENT ID
+# 50MK55WHICJMMH1T2LY2TLYFOZGGRT5SWPXPF52P02TMCGUC
+
+# CLIENT SECRET
+# 2XTSRKBF352QNLMKOTNUZNM4EMDSSJTFXYKK3DVG14DG2F5G
+
+env.dart
+
+
 # Miscellaneous
 *.class
 *.log
@@ -8,7 +17,6 @@
 .buildlog/
 .history
 .svn/
-
 # IntelliJ related
 *.iml
 *.ipr
