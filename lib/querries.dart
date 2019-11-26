@@ -19,3 +19,17 @@ Future<Responses> fetchPost(String location, String choose) async {
     throw Exception('Failed to load post');
   }
 }
+Future<ReponsesDetails> getVenueDetails(Results result) async {
+  final response =
+  await http.get('https://api.foursquare.com/v2/venues/'+result.id+'?client_id='+clientId+'&client_secret='+clientSecret+'&v=20191119');
+
+  if (response.statusCode == 200) {
+    // If the call to the server was successful, parse the JSON.
+    return ReponsesDetails.fromJson(json.decode(response.body));
+    //print(json.decode(response.body));
+
+  } else {
+    // If that call was not successful, throw an error.
+    throw Exception('Failed to load post');
+  }
+}

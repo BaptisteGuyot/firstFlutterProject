@@ -13,19 +13,18 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(
           title: const Text('Welcome to Flutter'),
         ),
-        body: Center(child: PageInput()),
+        body: Center(child: PageRecherche()),
       ),
     );
   }
 }
 
-class PageInput extends StatefulWidget {
+class PageRecherche extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => PageRechercheState();
-
 }
 
-class PageRechercheState extends State<PageInput> {
+class PageRechercheState extends State<PageRecherche> {
   final venueController = TextEditingController();
   final locationController = TextEditingController();
   List<Results> resultats = new List<Results>();
@@ -46,44 +45,106 @@ class PageRechercheState extends State<PageInput> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Form(
-        child: Row(mainAxisSize: MainAxisSize.max, children: [
-          Container(
-            width: 100,
-            height: 70,
-            child: TextField(
-              controller: locationController,
-              decoration: InputDecoration(
-                  labelText: 'Location', hintText: 'Location'),
+  Widget _MySecondPageStatsse(BuildContext context, Results item) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            Text(
+              item.name ?? 'Aucun Titre',
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-          Container(
-            width: 100,
-            height: 70,
-            child: TextField(
-              controller: venueController,
-              decoration: InputDecoration(
-                  labelText: 'Venue', hintText: 'Venue'),
+            equalNull(context, item.categories, "Categorie"),
+            Text(item.desc ?? 'Description : Non référencée !'),
+            Image.network(item.photos[0]),
+            Text(
+              'Commentaire :',
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-          Container(
-            width: 100,
-            height: 50,
-            child: FlatButton(color:Colors.greenAccent,
-                onPressed: () {
+            Text(item.commentsBis ?? 'Aucune Commentaires !'),
+            InkWell(
+                child: new Text(
+                  'Show on the Map',
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                onTap: () => {print("cc")}),
+          ],
+        ),
+      ),
+    );
+  }
 
-              fetchPost(locationController.text, venueController.text).then((result) {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+            child: Column(mainAxisSize: MainAxisSize.max, children: [
+              Row(
+                children :  [
+                Container(
+                  width: MediaQuery.of(context).size.width/2,
+                  height: 70,
+                  child: TextField(
+                    controller: locationController,
+                    decoration:
+                    InputDecoration(labelText: 'Location', hintText: 'Location'),
+                  ),
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width/2,
+                  height: 70,
+                  child: TextField(
+                    controller: venueController,
+                    decoration: InputDecoration(labelText: 'Venue', hintText: 'Venue'),
+                  ),
+                ),
+                ]),
+
+      Container(
+        width: MediaQuery.of(context).size.width,
+        height: 50,
+        child: FlatButton(
+            color: Colors.lightBlue,
+            onPressed: () {
+              fetchPost(locationController.text, venueController.text)
+                  .then((result) {
                 resultats.clear(); // Vide les anciens resultats
                 setState(() {
-                  resultats.addAll(result.listeResponses); // Ajoute les nouveaux résultats
+                  resultats.addAll(
+                      result.listeResponses); // Ajoute les nouveaux résultats
                 });
               });
             },
-                child: Text("Rechercher")),
-          )
-        ]));
-}
-
-
+            child: Text("Rechercher")),
+      ),
+      Expanded(
+        child: ListView.builder(
+            itemCount: resultats.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                  child: Container(
+                    height: 50,
+                    margin: EdgeInsets.all(5.0),
+                    color: Colors.amber[500],
+                    child: Center(child: Text(resultats[index].name)),
+                  ),
+                  onTap: () => {
+                        getVenueDetails(resultats[index]).then((result) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => _MySecondPageStatsse(
+                                      context, result.itemReponse)));
+                        }),
+                      });
+            }),
+      ),
+    ])));
+  }
 }
