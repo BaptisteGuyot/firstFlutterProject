@@ -1,6 +1,7 @@
 import 'package:app_flutter/querries.dart';
 import 'package:app_flutter/results.dart';
 import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 void main() => runApp(MyApp());
 
@@ -44,37 +45,46 @@ class PageRechercheState extends State<PageRecherche> {
     }
   }
 
-  @override
-  Widget _MySecondPageStatsse(BuildContext context, Results item) {
+  // ignore: non_constant_identifier_names
+  Widget _PageDetailsState(BuildContext context, Results item) {
     return Scaffold(
       body: Center(
-        child: Column(
-          children: <Widget>[
-            Text(
-              item.name ?? 'Aucun Titre',
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            equalNull(context, item.categories, "Categorie"),
-            Text(item.desc ?? 'Description : Non référencée !'),
-            Image.network(item.photos[0]),
-            Text(
-              'Commentaire :',
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(item.commentsBis ?? 'Aucune Commentaires !'),
-            InkWell(
-                child: new Text(
-                  'Show on the Map',
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                onTap: () => {print("cc")}),
-          ],
+        child: Container(
+          margin:EdgeInsets.only(top:100.0),
+          child: Column(
+            children: <Widget>[
+              Text(
+                item.name ?? 'Aucun Titre',
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.clip,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 35),
+              ),
+              equalNull(context, item.categories, "Categorie"),
+              Text(item.desc ?? 'Description : Non référencée !'),
+
+              CarouselSlider(
+                height: 400.0,
+                items: item.photos.map((i) {
+                  return Image.network(i);
+                }).toList(),
+              ),
+              Text(
+                'Commentaire :',
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(item.commentsBis ?? 'Aucune Commentaires !'),
+              InkWell(
+                  child: new Text(
+                    'Show on the Map',
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onTap: () => {print("cc")}),
+            ],
+          ),
         ),
       ),
     );
@@ -85,34 +95,37 @@ class PageRechercheState extends State<PageRecherche> {
     return Scaffold(
         body: Center(
             child: Column(mainAxisSize: MainAxisSize.max, children: [
-              Row(
-                children :  [
-                Container(
-                  width: MediaQuery.of(context).size.width/2,
-                  height: 70,
-                  child: TextField(
-                    controller: locationController,
-                    decoration:
-                    InputDecoration(labelText: 'Location', hintText: 'Location'),
-                  ),
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width/2,
-                  height: 70,
-                  child: TextField(
-                    controller: venueController,
-                    decoration: InputDecoration(labelText: 'Venue', hintText: 'Venue'),
-                  ),
-                ),
-                ]),
-
+      Row(children: [
+        Container(
+          // INPUT LOCATION
+          width: MediaQuery.of(context).size.width / 2,
+          height: 70,
+          child: TextField(
+            controller: locationController,
+            decoration:
+                InputDecoration(labelText: 'Location', hintText: 'Location'),
+          ),
+        ),
+        Container(
+          // INPUT VENUE
+          width: MediaQuery.of(context).size.width / 2,
+          height: 70,
+          child: TextField(
+            controller: venueController,
+            decoration: InputDecoration(labelText: 'Venue', hintText: 'Venue'),
+          ),
+        ),
+      ]),
       Container(
+        // BOUTON RECHERCHER
         width: MediaQuery.of(context).size.width,
         height: 50,
+        margin: EdgeInsets.only(bottom: 50.0),
+        // Marge pour séparer les champs et les résultats
         child: FlatButton(
             color: Colors.lightBlue,
             onPressed: () {
-              fetchPost(locationController.text, venueController.text)
+              fetchPost(locationController.text, venueController.text, context)
                   .then((result) {
                 resultats.clear(); // Vide les anciens resultats
                 setState(() {
@@ -124,22 +137,24 @@ class PageRechercheState extends State<PageRecherche> {
             child: Text("Rechercher")),
       ),
       Expanded(
+        // RESULTATS
         child: ListView.builder(
             itemCount: resultats.length,
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
                   child: Container(
                     height: 50,
-                    margin: EdgeInsets.all(5.0),
-                    color: Colors.amber[500],
+                    decoration: myBoxDecoration(),
+                    // https://medium.com/@suragch/adding-a-border-to-a-widget-in-flutter-d387bc5d7cff
+                    margin: EdgeInsets.all(3.0),
                     child: Center(child: Text(resultats[index].name)),
                   ),
                   onTap: () => {
-                        getVenueDetails(resultats[index]).then((result) {
+                        getVenueDetails(resultats[index], context).then((result) {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (_) => _MySecondPageStatsse(
+                                  builder: (_) => _PageDetailsState(
                                       context, result.itemReponse)));
                         }),
                       });
@@ -147,4 +162,10 @@ class PageRechercheState extends State<PageRecherche> {
       ),
     ])));
   }
+}
+
+BoxDecoration myBoxDecoration() {
+  return BoxDecoration(
+    border: Border.all(),
+  );
 }

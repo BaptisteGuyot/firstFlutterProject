@@ -1,3 +1,5 @@
+import 'package:app_flutter/querries.dart';
+
 class Results{
   String name;
   String desc;
@@ -82,6 +84,20 @@ class ReponsesDetails {
               json["response"]["venue"]["bestPhoto"]["suffix"]
 
       );
+      print("coucou");
+      getVenuesPhotos(itemR.id).then((result){
+        result["response"]["photos"]["items"].map((photo) {
+          itemR.photos.add(
+              photo["prefix"]+
+                  photo["width"].toString()+
+                  "x"+
+                  photo["height"].toString()+
+                  photo["suffix"]);
+        });
+        print(itemR.photos);
+      }
+      );
+
     }else{
       itemR.photos.add(
           "https://www.prendsmaplace.fr/wp-content/themes/prendsmaplace/images/defaut_image.gif"
